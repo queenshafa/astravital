@@ -1,14 +1,17 @@
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 
+const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-montserrat" });
+
 export const metadata = {
-  title: "BodyScan – Anatomi 3D",
-  description: "Model anatomi 3D interaktif untuk menandai area yang sakit",
+  title: "Astra Vital",
+  description: "Health dashboard with an interactive 3D anatomy body",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="id">
-      <body>{children}</body>
+    <html lang="en">
+      <body className={`${montserrat.variable} font-sans antialiased`}>{children}</body>
     </html>
   );
 }

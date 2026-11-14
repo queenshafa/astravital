@@ -1,5 +1,5 @@
-import BodyScan from "../components/BodyScan";
+import Dashboard from "@/components/Dashboard";
 
 export default function Page() {
-  return <BodyScan />;
+  return <Dashboard />;
 }
