@@ -113,19 +113,23 @@ http://localhost:3000
 ```text
 src/
 ├── app/
+│   ├── (app)/
+│   │   ├── health-trends/
+│   │   ├── risk-analysis/
+│   │   ├── space-hazard/
+│   │   ├── layout.js
+│   │   └── page.js
 │   ├── api/
-│   │   ├── hazards/
-│   │   └── risk/
+│   ├── auth/
+│   ├── baseline/
 │   ├── lib/
-│   │   ├── hazard.js
-│   │   └── riskEngine.js
-│   ├── risk-analysis/
-│   └── space-hazard/
-│
-└── components/
-    ├── RiskAnalysis.js
-    ├── RiskTrendChart.js
-    └── SpaceHazardMonitor.js
+│   ├── login/
+│   ├── globals.css
+│   ├── icon.png
+│   └── layout.js
+├── components/
+├── lib/
+└── proxy.js
 ```
 
 ## NASA data and research
