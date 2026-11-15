@@ -1,10 +1,10 @@
-# AstraVital
+# Medteor
 
 **Personalized astronaut health and space hazard monitoring.**
 
-AstraVital is a web-based platform that helps astronauts and mission teams monitor changes in physiological health while keeping track of potential environmental hazards in space.
+Medteor is a web-based platform that helps astronauts and mission teams monitor changes in physiological health while keeping track of potential environmental hazards in space.
 
-Instead of relying only on general thresholds, AstraVital compares current health data with an individual's personal baseline to identify meaningful changes.
+Instead of relying only on general thresholds, Medteor compares current health data with an individual's personal baseline to identify meaningful changes.
 
 ## Features
 
@@ -34,7 +34,7 @@ The system identifies significant deviations and provides:
 
 ### Risk trends
 
-AstraVital visualizes changes in overall risk over time, making it easier to identify patterns across multiple days.
+Medteor visualizes changes in overall risk over time, making it easier to identify patterns across multiple days.
 
 ### Space hazard monitoring
 
@@ -50,7 +50,7 @@ The application uses NASA/CCMC DONKI data to retrieve recent space weather infor
 
 ## How it works
 
-AstraVital combines two sources of context:
+Medteor combines two sources of context:
 
 **Personal health data**
 
@@ -78,8 +78,8 @@ NASA/CCMC DONKI is used as a source of space weather data.
 Clone the repository:
 
 ```bash
-git clone https://github.com/queenshafa/astravital.git
-cd astravital
+git clone https://github.com/queenshafa/medteor.git
+cd medteor
 ```
 
 Install dependencies:
@@ -130,13 +130,13 @@ src/
 
 ## NASA data and research
 
-AstraVital uses NASA Human Research Program resources as part of the project's research into the health challenges associated with human spaceflight.
+Medteor uses NASA Human Research Program resources as part of the project's research into the health challenges associated with human spaceflight.
 
-For the Space Hazard Monitor, AstraVital uses NASA/CCMC DONKI space weather data, including information related to solar flares, solar energetic particle events, and geomagnetic storms.
+For the Space Hazard Monitor, Medteor uses NASA/CCMC DONKI space weather data, including information related to solar flares, solar energetic particle events, and geomagnetic storms.
 
 ## Future development
 
-AstraVital is currently a prototype. Future development could include:
+Medteor is currently a prototype. Future development could include:
 
 - Wearable device integration
 - Additional physiological metrics
@@ -155,4 +155,4 @@ AstraVital is currently a prototype. Future development could include:
 
 ## Disclaimer
 
-AstraVital is a prototype developed for educational and innovation purposes. It is not intended to replace professional medical diagnosis or medical advice.
+Medteor is a prototype developed for educational and innovation purposes. It is not intended to replace professional medical diagnosis or medical advice.
