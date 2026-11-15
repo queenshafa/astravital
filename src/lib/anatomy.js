@@ -3,13 +3,13 @@ import * as THREE from "three";
 // ---------- data ----------
 export const LV = [
   null,
-  { n: "Ringan", c: "#ffc21a" },
-  { n: "Sedang", c: "#ff8a1f" },
-  { n: "Berat", c: "#ff3d1f" },
+  { n: "Mild", c: "#ffc21a" },
+  { n: "Moderate", c: "#ff8a1f" },
+  { n: "Severe", c: "#ff3d1f" },
 ];
-const LIMB = { sh: "Bahu", uarm: "Lengan atas", elbow: "Siku", farm: "Lengan bawah", hand: "Tangan", thigh: "Paha", knee: "Lutut", shin: "Betis", foot: "Kaki" };
-export const NAMES = { head: "Kepala", neck: "Leher", chest: "Dada & jantung", abdomen: "Perut", pelvis: "Pinggul" };
-Object.keys(LIMB).forEach((k) => ["l", "r"].forEach((s) => (NAMES[k + "_" + s] = LIMB[k] + (s === "l" ? " kiri" : " kanan"))));
+const LIMB = { sh: "Shoulder", uarm: "Upper arm", elbow: "Elbow", farm: "Forearm", hand: "Hand", thigh: "Thigh", knee: "Knee", shin: "Calf", foot: "Foot" };
+export const NAMES = { head: "Head", neck: "Neck", chest: "Chest & heart", abdomen: "Abdomen", pelvis: "Pelvis" };
+Object.keys(LIMB).forEach((k) => ["l", "r"].forEach((s) => (NAMES[k + "_" + s] = (s === "l" ? "Left " : "Right ") + LIMB[k])));
 export const SZ = { head: 0.3, neck: 0.15, chest: 0.42, abdomen: 0.34, pelvis: 0.3, sh: 0.2, uarm: 0.22, elbow: 0.16, farm: 0.2, hand: 0.15, thigh: 0.3, knee: 0.18, shin: 0.26, foot: 0.18 };
 
 // Landmarks measured on the model after fitModel(): height 1.78, faces +z, figure's left = +x.

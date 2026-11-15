@@ -3,6 +3,7 @@
 import { useState } from "react";
 import BodyViewer from "./BodyViewer";
 import { LV, NAMES } from "@/lib/anatomy";
+import { CATEGORIES, levelIndex } from "@/lib/risk";
 
 const VIEWS = [["Front", 0], ["Right", Math.PI / 2], ["Back", Math.PI], ["Left", -Math.PI / 2]];
 const LAYERS = { skin: "Skin", bones: "Bones", vessels: "Vessels", organs: "Organs" };
@@ -10,7 +11,7 @@ const chip = (on) =>
   "cursor-pointer rounded-lg border px-3 py-1.5 text-[13px] transition-colors " +
   (on ? "border-brand bg-brand text-white" : "border-line text-white/80 hover:border-brand");
 
-export default function AnatomyPanel({ pain, setPain, sel, setSel }) {
+export default function AnatomyPanel({ pain, setPain, shown, analyses = [], sel, setSel }) {
   const [layers, setLayers] = useState({ skin: true, bones: true, vessels: true, organs: true });
   const [auto, setAuto] = useState(true);
   const [viewReq, setViewReq] = useState(null);
@@ -42,7 +43,7 @@ export default function AnatomyPanel({ pain, setPain, sel, setSel }) {
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_300px]">
         <div className="relative h-[min(70vh,640px)] min-h-[440px] overflow-hidden rounded-2xl border border-line bg-[radial-gradient(ellipse_at_50%_35%,#34303a,#17151a)]">
-          <BodyViewer pain={pain} sel={sel} layers={layers} auto={auto} onPick={pick} viewReq={viewReq} />
+          <BodyViewer pain={shown} sel={sel} layers={layers} auto={auto} onPick={pick} viewReq={viewReq} />
           {sel && (
             <div className="absolute bottom-3.5 left-3.5 z-[2] w-[min(250px,calc(100%_-_28px))] rounded-2xl border border-line bg-base/85 p-4 backdrop-blur-xl">
               <button onClick={() => setSel(null)} className="absolute right-3 top-3 h-7 w-7 rounded-lg border border-line" aria-label="Close">×</button>
@@ -93,11 +94,34 @@ export default function AnatomyPanel({ pain, setPain, sel, setSel }) {
           </div>
 
           <div>
+            <h3 className="mb-2 text-[11px] font-bold tracking-[0.12em] text-white/50">RISK ANALYSIS</h3>
+            {analyses.length ? (
+              <div className="flex flex-col gap-1.5">
+                {analyses.map((a) => {
+                  const lv = levelIndex(a.risk_level), c = CATEGORIES[a.risk_category];
+                  return (
+                    <button key={a.risk_category} onClick={() => c && setSel(c.parts[0])} className="rounded-lg border border-line px-3 py-2 text-left hover:border-brand">
+                      <div className="flex items-center gap-2.5 text-sm">
+                        <span>{c?.icon}</span>
+                        <span className="flex-1">{c?.label ?? a.risk_category}</span>
+                        <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize" style={{ background: lv ? LV[lv].c : "#2f6f4f", color: lv ? "#1a1208" : "#fff" }}>{a.risk_level}</span>
+                      </div>
+                      {a.possible_concern && <p className="mt-1 text-xs text-white/50">{a.possible_concern}</p>}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-[13px] text-white/50">No risk analysis yet. It is created from your latest reading vs. baseline.</p>
+            )}
+          </div>
+
+          <div>
             <h3 className="mb-2 text-[11px] font-bold tracking-[0.12em] text-white/50">ALL BODY PARTS</h3>
             <div className="flex flex-wrap gap-1.5">
               {Object.keys(NAMES).map((id) => (
                 <button key={id} onClick={() => pick(id)} className={"flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs " + (sel === id ? "border-brand" : "border-line")}>
-                  <span className="h-2 w-2 rounded-full bg-line" style={pain[id] ? { background: LV[pain[id]].c } : undefined} />
+                  <span className="h-2 w-2 rounded-full bg-line" style={shown[id] ? { background: LV[shown[id]].c } : undefined} />
                   {NAMES[id]}
                 </button>
               ))}
