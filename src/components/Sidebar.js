@@ -21,10 +21,17 @@ export default function Sidebar() {
 
   return (
     <aside className="sticky top-7 hidden h-[calc(100vh-3.5rem)] flex-col rounded-2xl bg-card px-4 py-10 lg:flex">
-      <div className="px-4 text-[44px] font-semibold leading-[0.95] tracking-tight">
-        Astra
-        <br />
-        Vital<span className="text-brand">.</span>
+      <div className="flex justify-center px-4">
+        <Link
+          href="/"
+          className="flex items-center justify-center transition-opacity hover:opacity-80"
+        >
+          <img
+            src="/medteor_logo.png"
+            alt="Medteor"
+            className="h-auto w-[150px] object-contain"
+          />
+        </Link>
       </div>
 
       <p className="mt-14 px-4 text-sm text-white/40">Menu</p>
