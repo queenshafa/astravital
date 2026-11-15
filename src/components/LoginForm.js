@@ -43,10 +43,12 @@ export default function LoginForm() {
   return (
     <div className="grid min-h-screen place-items-center bg-base p-4">
       <form onSubmit={submit} className="w-full max-w-md rounded-[28px] border border-line bg-card p-8 sm:p-10">
-        <div className="text-[40px] font-semibold leading-[0.95] tracking-tight">
-          Astra
-          <br />
-          Vital<span className="text-brand">.</span>
+        <div className="flex justify-center">
+          <img
+            src="/medteor_logo.png"
+            alt="Medteor"
+            className="h-auto w-[190px] object-contain"
+          />
         </div>
         <p className="mt-4 text-[15px] text-white/60">{mode === "signin" ? "Log in to see your health dashboard." : "Create an account to start tracking."}</p>
 
