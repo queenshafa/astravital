@@ -10,8 +10,8 @@ import { supabase } from "@/lib/supabase";
 const MENU = [
   { label: "Dashboard", href: "/" },
   { label: "Health Trends", href: "/health-trends" },
-  { label: "Risk Analysis", href: "#" },
-  { label: "Lab Records", href: "#" },
+  { label: "Risk Analysis", href: "/risk-analysis" },
+  { label: "Space Hazard", href: "/space-hazard" },
 ];
 
 export default function Sidebar() {
