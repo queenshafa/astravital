@@ -91,7 +91,7 @@ npm install
 Create a `.env.local` file and add your environment variables:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 NASA_API_KEY=your_nasa_api_key
 ```
