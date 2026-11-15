@@ -5,13 +5,14 @@ import { useMemo, useState } from "react";
 import Header from "./Header";
 import MetricCard from "./MetricCard";
 import AnatomyPanel from "./AnatomyPanel";
-import HazardsPanel from "./HazardsPanel";
 import { useAstronaut } from "@/lib/astronaut";
+import { useHazards } from "@/lib/useHazards";
 import { buildMetrics } from "@/lib/metrics";
 import { CATEGORIES, levelIndex, riskToPain } from "@/lib/risk";
 
 export default function DashboardView() {
   const { loading, error, astronaut, baseline, latest, analyses } = useAstronaut();
+  const { hazards } = useHazards();
   const [pain, setPain] = useState({}); // marks added manually on the body
   const [sel, setSel] = useState(null);
 
@@ -31,7 +32,13 @@ export default function DashboardView() {
 
   return (
     <>
-      <Header name={astronaut?.name} status={status} />
+      <Header
+        name={astronaut?.name}
+        status={status}
+        analyses={analyses}
+        hazards={hazards}
+        loading={loading}
+      />
       {!loading && !astronaut && !error && (
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-brand/40 bg-card p-6">
           <p className="text-[15px]">Start by entering the astronaut&apos;s personal baseline. All dashboards compare new readings against it.</p>
@@ -41,7 +48,6 @@ export default function DashboardView() {
       <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {buildMetrics(baseline, latest).map((m) => <MetricCard key={m.label} {...m} />)}
       </section>
-      <HazardsPanel />
       <AnatomyPanel pain={pain} setPain={setPain} shown={shown} analyses={analyses} sel={sel} setSel={setSel} />
     </>
   );

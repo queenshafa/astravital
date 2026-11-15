@@ -9,6 +9,45 @@ const BASES = [
   "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get",
   "https://api.nasa.gov/DONKI",
 ];
+// tambahkan di atas GET
+const HIST = {
+  FLR: { key: "flares", time: "beginTime" },
+  SEP: { key: "particles", time: "eventTime" },
+  GST: { key: "storms", time: "startTime" },
+};
+
+async function history(days) {
+  const end = new Date();
+  const start = new Date(end.getTime() - (days - 1) * 864e5);
+
+  // semua hari diisi 0 dulu supaya chart tidak bolong
+  const buckets = {};
+  for (let i = 0; i < days; i++) {
+    const d = day(new Date(start.getTime() + i * 864e5));
+    buckets[d] = { date: d, flares: 0, particles: 0, storms: 0 };
+  }
+
+  const types = Object.keys(HIST);
+  const results = await Promise.allSettled(types.map((t) => donki(t, start, end)));
+
+  const failed = [];
+  results.forEach((r, i) => {
+    if (r.status === "rejected") return failed.push(types[i]);
+    const { key, time } = HIST[types[i]];
+    for (const ev of r.value) {
+      const d = String(ev[time] || "").slice(0, 10);
+      if (buckets[d]) buckets[d][key] += 1;
+    }
+  });
+
+  if (failed.length === types.length) {
+    return NextResponse.json({ error: "NASA DONKI unavailable for history." }, { status: 502 });
+  }
+  return NextResponse.json({
+    days: Object.values(buckets),
+    warning: failed.length ? `Partial data, missing: ${failed.join(", ")}` : null,
+  });
+}
 const day = (d) => d.toISOString().slice(0, 10);
 
 async function donki(type, start, end) {

@@ -1,36 +1,64 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
+import TrendChart from "./TrendChart";
+import { useHazards } from "@/lib/useHazards";
 
-function StatusBadge({ status = "Normal" }) {
+const META = {
+  radiation: { name: "Radiation", icon: "☢️" },
+  geomagnetic: { name: "Geomagnetic", icon: "🧲" },
+  microgravity: { name: "Microgravity", icon: "🛰️" },
+  isolation: { name: "Isolation", icon: "🔒" },
+  closed_environment: { name: "Closed Environment", icon: "🧪" },
+};
+
+const COLOR = {
+  normal: "#2f6f4f",
+  attention: "#ffc21a",
+  warning: "#ff8a1f",
+  critical: "#ff3b30",
+};
+
+const RANK = { normal: 0, attention: 1, warning: 2, critical: 3 };
+
+function normStatus(hazard) {
+  if (!hazard) return "normal";
+  return String(hazard.status || "normal").toLowerCase();
+}
+
+function cap(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function StatusBadge({ status = "normal" }) {
+  const st = String(status).toLowerCase();
   return (
-    <span className="rounded-full bg-brand px-3 py-1 text-[11px] font-medium text-white">
-      {status}
+    <span
+      className="shrink-0 rounded-full px-3 py-1 text-[11px] font-medium"
+      style={{
+        background: COLOR[st] || COLOR.normal,
+        color: st === "normal" ? "#fff" : "#1a1208",
+      }}
+    >
+      {cap(st)}
     </span>
   );
 }
 
-function MetricCard({ icon, label, value, unit, status = "Normal", loading }) {
+function MetricCard({ icon, label, value, unit, status = "normal", loading }) {
   return (
     <div className="rounded-xl bg-card p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="text-3xl">{icon}</div>
-
-        <p className="text-right text-sm text-white/70">
-          {label}
-        </p>
+        <p className="text-right text-sm text-white/70">{label}</p>
       </div>
 
-      <div className="mt-4 flex items-end justify-between">
-        <div>
+      <div className="mt-4 flex items-end justify-between gap-3">
+        <div className="min-w-0">
           <div className="text-2xl font-medium text-white">
             {loading ? "—" : value}
           </div>
-
-          <p className="mt-3 text-[11px] text-white/40">
-            {unit}
-          </p>
+          <p className="mt-3 truncate text-[11px] text-white/40">{unit}</p>
         </div>
 
         <StatusBadge status={status} />
@@ -39,111 +67,79 @@ function MetricCard({ icon, label, value, unit, status = "Normal", loading }) {
   );
 }
 
-function getStatus(hazard) {
-  if (!hazard) return "Normal";
-  return hazard.status || "Normal";
-}
-
-function getEventIcon(type) {
-  if (type === "Solar Flare") return "☀";
-  if (type === "Solar Particle Activity") return "☄";
-  if (type === "Geomagnetic Storm") return "🧲";
-
-  return "⚠";
+function formatTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 export default function SpaceHazardMonitor() {
-  const [hazards, setHazards] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [warning, setWarning] = useState(null);
+  const { loading, error, warning, hazards } = useHazards();
+  const notice = error || warning;
 
-  async function loadHazards() {
-    try {
-      setLoading(true);
+  const byType = (type) => hazards.find((h) => h.hazard_type === type);
 
-      const res = await fetch("/api/hazards", {
-        cache: "no-store",
-      });
+  const radiation = byType("radiation");
+  const geomagnetic = byType("geomagnetic");
+  const microgravity = byType("microgravity");
 
-      const data = await res.json();
+  // semua hazard yang dikenal, diurutkan dari yang paling parah
+  const events = Object.keys(META)
+    .map((t) => byType(t))
+    .filter(Boolean)
+    .sort((a, b) => RANK[normStatus(b)] - RANK[normStatus(a)]);
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to load hazards");
-      }
-
-      setHazards(data.hazards || []);
-      setWarning(data.warning || null);
-    } catch (error) {
-      console.error("Hazard error:", error);
-      setWarning(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadHazards();
-  }, []);
-
-  const solarFlare = hazards.find(
-    (h) => h.hazard_type === "Solar Flare"
-  );
-
-  const solarParticle = hazards.find(
-    (h) => h.hazard_type === "Solar Particle Activity"
-  );
-
-  const geomagneticStorm = hazards.find(
-    (h) => h.hazard_type === "Geomagnetic Storm"
-  );
-
-  const hasWarning = hazards.some((h) =>
-    ["warning", "high", "critical"].includes(
-      String(h.status || "").toLowerCase()
-    )
-  );
-
-  const hasMonitor = hazards.some((h) =>
-    ["monitor", "moderate"].includes(
-      String(h.status || "").toLowerCase()
-    )
+  const worst = events.reduce(
+    (max, h) => Math.max(max, RANK[normStatus(h)] ?? 0),
+    0
   );
 
   let overallRisk = "Low";
-  let overallStatus = "Normal";
+  let overallStatus = "normal";
   let assessmentText =
     "All monitored space environment conditions are within safe ranges.";
 
-  if (hasMonitor) {
+  if (worst === RANK.attention) {
     overallRisk = "Monitor";
-    overallStatus = "Monitor";
+    overallStatus = "attention";
     assessmentText =
       "Environmental activity is elevated but currently under monitoring.";
   }
-
-  if (hasWarning) {
+  if (worst === RANK.warning) {
     overallRisk = "High";
-    overallStatus = "Warning";
+    overallStatus = "warning";
     assessmentText =
       "One or more environmental hazards require additional attention.";
   }
+  if (worst === RANK.critical) {
+    overallRisk = "Critical";
+    overallStatus = "critical";
+    assessmentText =
+      "Critical environmental hazard detected. Immediate action is recommended.";
+  }
+
+  // value/unit: pakai dari API kalau ada, kalau tidak fallback ke status & source
+  const cardProps = (h) => ({
+    value: h?.value ?? cap(normStatus(h)),
+    unit: h?.unit ?? h?.source ?? "—",
+    status: normStatus(h),
+    loading,
+  });
 
   return (
     <div className="min-h-screen bg-base p-4 lg:p-7">
       <div className="mx-auto grid min-h-[calc(100vh-3.5rem)] max-w-[1560px] gap-5 lg:grid-cols-[264px_1fr]">
-
         {/* SIDEBAR */}
         <Sidebar />
 
         {/* MAIN CONTENT */}
         <main className="flex min-h-full min-w-0 flex-col gap-4">
-
           {/* HEADER */}
           <section className="rounded-xl bg-card px-6 py-10 lg:px-7">
             <h1 className="text-[24px] font-semibold text-white">
               Space Hazard Monitor
             </h1>
-
             <p className="mt-1 text-sm text-white/60">
               Monitor environmental factors that may impact your health.
             </p>
@@ -152,30 +148,21 @@ export default function SpaceHazardMonitor() {
           {/* METRIC CARDS */}
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard
-              icon="☀"
-              label="Solar Flare Activity"
-              value={solarFlare?.value ?? 0}
-              unit={solarFlare?.unit ?? "events"}
-              status={getStatus(solarFlare)}
-              loading={loading}
+              icon={META.radiation.icon}
+              label="Radiation"
+              {...cardProps(radiation)}
             />
 
             <MetricCard
-              icon="☄"
-              label="Particle Activity"
-              value={solarParticle?.value ?? 0}
-              unit={solarParticle?.unit ?? "events"}
-              status={getStatus(solarParticle)}
-              loading={loading}
+              icon={META.geomagnetic.icon}
+              label="Geomagnetic"
+              {...cardProps(geomagnetic)}
             />
 
             <MetricCard
-              icon="🧲"
-              label="Geomagnetic Storm"
-              value={geomagneticStorm?.value ?? 0}
-              unit={geomagneticStorm?.unit ?? "events"}
-              status={getStatus(geomagneticStorm)}
-              loading={loading}
+              icon={META.microgravity.icon}
+              label="Microgravity"
+              {...cardProps(microgravity)}
             />
 
             <MetricCard
@@ -188,22 +175,10 @@ export default function SpaceHazardMonitor() {
             />
           </section>
 
-          {/* MIDDLE SECTION - FLEX-1 BIAR NGISI SPACE */}
+          {/* MIDDLE SECTION */}
           <section className="grid flex-1 gap-4 xl:grid-cols-[1fr_1.08fr]">
-
             {/* SPACE HAZARD TRENDS */}
-            <div className="flex h-full min-h-[278px] flex-col rounded-xl bg-card p-5">
-              <h2 className="text-[15px] font-semibold text-white">
-                Space Hazard Trends
-              </h2>
-
-              {/* NANTI RECHARTS MASUK SINI */}
-              <div className="flex flex-1 items-center justify-center">
-                <p className="text-sm text-white/30">
-                  Historical trend data loading...
-                </p>
-              </div>
-            </div>
+            <TrendChart days={14} />
 
             {/* RECENT SPACE EVENTS */}
             <div className="h-full rounded-xl bg-card p-5">
@@ -216,38 +191,41 @@ export default function SpaceHazardMonitor() {
                   <p className="text-sm text-white/40">
                     Loading space events...
                   </p>
-                ) : hazards.length === 0 ? (
+                ) : events.length === 0 ? (
                   <p className="text-sm text-white/40">
                     No recent space events found.
                   </p>
                 ) : (
-                  hazards.slice(0, 3).map((hazard, index) => (
+                  events.map((hazard) => (
                     <div
-                      key={hazard.id || index}
+                      key={hazard.hazard_type}
                       className="flex items-center justify-between gap-4"
                     >
                       <div className="flex min-w-0 items-center gap-3">
-
                         {/* EVENT ICON */}
                         <div className="flex h-[54px] w-[64px] shrink-0 items-center justify-center rounded-md bg-white/5 text-2xl">
-                          {getEventIcon(hazard.hazard_type)}
+                          {META[hazard.hazard_type].icon}
                         </div>
 
                         <div className="min-w-0">
                           <h3 className="truncate text-sm font-medium text-white">
-                            {hazard.hazard_type}
+                            {META[hazard.hazard_type].name}
                           </h3>
 
                           <p className="mt-1 text-[11px] leading-relaxed text-white/45">
-                            {hazard.details ||
+                            {hazard.description ||
                               "Space environment activity detected."}
+                          </p>
+
+                          <p className="mt-1 text-[10px] text-white/30">
+                            {hazard.source}
+                            {formatTime(hazard.recorded_at) &&
+                              ` · ${formatTime(hazard.recorded_at)}`}
                           </p>
                         </div>
                       </div>
 
-                      <StatusBadge
-                        status={getStatus(hazard)}
-                      />
+                      <StatusBadge status={normStatus(hazard)} />
                     </div>
                   ))
                 )}
@@ -266,18 +244,17 @@ export default function SpaceHazardMonitor() {
                 Current Assessment
               </h2>
 
-              <p className="mt-1 text-xs text-white/55">
-                {assessmentText}
-              </p>
+              <p className="mt-1 text-xs text-white/55">{assessmentText}</p>
 
-              {warning && (
-                <p className="mt-2 text-xs text-yellow-400">
-                  {warning}
-                </p>
+              {notice && (
+                <p className="mt-2 text-xs text-yellow-400">{notice}</p>
               )}
+
+              <p className="mt-2 text-[10px] text-white/30">
+                Space weather data: NASA CCMC DONKI. Other conditions are simulated.
+              </p>
             </div>
           </section>
-
         </main>
       </div>
     </div>

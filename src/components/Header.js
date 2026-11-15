@@ -1,7 +1,7 @@
-import { Bell } from "./icons";
+import NotificationBell from "./NotificationBell";
 import LogoutButton from "./LogoutButton";
 
-export default function Header({ name, status }) {
+export default function Header({ name, status, analyses, hazards, loading }) {
   return (
     <header className="flex items-center justify-between rounded-2xl bg-card px-8 py-10">
       <div>
@@ -13,9 +13,7 @@ export default function Header({ name, status }) {
       </div>
       <div className="flex items-center gap-3">
         <LogoutButton className="rounded-lg border border-line px-3 py-2 text-sm text-white/80 hover:border-brand hover:text-brand lg:hidden" />
-        <button className="grid h-10 w-10 place-items-center rounded-lg bg-white text-base" aria-label="Notifications">
-          <Bell width={18} height={18} />
-        </button>
+        <NotificationBell analyses={analyses} hazards={hazards} loading={loading} />
       </div>
     </header>
   );

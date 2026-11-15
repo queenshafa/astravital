@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import MetricCard from "./MetricCard";
 import AreaChart from "./AreaChart";
 import { useAstronaut } from "@/lib/astronaut";
@@ -28,8 +28,15 @@ function ChartCard({ title, data, series }) {
 
 export default function HealthTrendsView() {
   const [range, setRange] = useState("week");
+  const [now, setNow] = useState(null);
+
+  // new Date() hanya dipanggil di browser, setelah mount
+  useEffect(() => {
+    setNow(new Date());
+  }, []);
+
   const { error, baseline, latest, readings } = useAstronaut({ days: RANGE_DAYS[range] });
-  const data = useMemo(() => bucketize(readings, range), [readings, range]);
+  const data = useMemo(() => bucketize(readings, range, now), [readings, range, now]);
   const b = baseline || {};
 
   return (
