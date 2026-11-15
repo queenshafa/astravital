@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -17,43 +18,125 @@ const MENU = [
 export default function Sidebar() {
   const path = usePathname();
   const [email, setEmail] = useState("");
-  useEffect(() => { supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email || "")); }, []);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    supabase.auth
+      .getUser()
+      .then(({ data }) => setEmail(data.user?.email || ""));
+  }, []);
+
+  // Tutup menu ketika berpindah halaman
+  useEffect(() => {
+    setIsOpen(false);
+  }, [path]);
 
   return (
-    <aside className="sticky top-7 hidden h-[calc(100vh-3.5rem)] flex-col rounded-2xl bg-card px-4 py-10 lg:flex">
-      <div className="flex justify-center px-4">
-        <Link
-          href="/"
-          className="flex items-center justify-center transition-opacity hover:opacity-80"
-        >
+    <>
+      {/* MOBILE / TABLET HEADER */}
+      <div className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between border-b border-line bg-card px-4 py-3 lg:hidden">
+        <Link href="/" className="flex items-center">
           <img
             src="/medteor_logo.png"
             alt="Medteor"
-            className="h-auto w-[150px] object-contain"
+            className="h-auto w-[110px] object-contain"
           />
         </Link>
-      </div>
 
-      <p className="mt-14 px-4 text-sm text-white/40">Menu</p>
-      <nav className="mt-4 flex flex-col gap-1.5">
-        {MENU.map((m) => (
-          <Link
-            key={m.label}
-            href={m.href}
-            className={"rounded-md px-4 py-3 text-[15px] transition-colors " + (path === m.href ? "bg-brand text-white" : "text-white/90 hover:text-brand")}
-          >
-            {m.label}
-          </Link>
-        ))}
-      </nav>
-
-      <div className="mt-auto flex flex-col gap-2">
-        {email && <p className="truncate px-4 text-xs text-white/50" title={email}>{email}</p>}
-        <button className="flex items-center gap-2 rounded-md bg-brand px-4 py-3 text-[15px] text-white">
-          <Cog width={18} height={18} /> Setting
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isOpen}
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-line text-white transition-colors hover:border-brand hover:text-brand"
+        >
+          {isOpen ? (
+            <span className="text-2xl leading-none">×</span>
+          ) : (
+            <span className="flex flex-col gap-1.5">
+              <span className="h-0.5 w-5 rounded bg-current" />
+              <span className="h-0.5 w-5 rounded bg-current" />
+              <span className="h-0.5 w-5 rounded bg-current" />
+            </span>
+          )}
         </button>
-        <LogoutButton className="rounded-md border border-line px-4 py-3 text-left text-[15px] text-white/80 transition-colors hover:border-brand hover:text-brand" />
       </div>
-    </aside>
+
+      {/* MOBILE OVERLAY */}
+      {isOpen && (
+        <button
+          aria-label="Close menu overlay"
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+        />
+      )}
+
+      {/* SIDEBAR */}
+      <aside
+        className={`
+          fixed left-0 top-0 z-50 flex h-screen w-[280px] flex-col
+          rounded-r-2xl bg-card px-4 py-8 shadow-xl
+          transition-transform duration-300 ease-in-out
+          lg:sticky lg:top-7 lg:z-auto lg:h-[calc(100vh-3.5rem)]
+          lg:w-auto lg:translate-x-0 lg:rounded-2xl lg:px-4 lg:py-10
+          lg:shadow-none
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
+      >
+        {/* LOGO */}
+        <div className="flex justify-center px-4">
+          <Link
+            href="/"
+            className="flex items-center justify-center transition-opacity hover:opacity-80"
+          >
+            <img
+              src="/medteor_logo.png"
+              alt="Medteor"
+              className="h-auto w-[150px] object-contain"
+            />
+          </Link>
+        </div>
+
+        {/* MENU */}
+        <p className="mt-10 px-4 text-sm text-white/40 lg:mt-14">
+          Menu
+        </p>
+
+        <nav className="mt-4 flex flex-col gap-1.5">
+          {MENU.map((m) => (
+            <Link
+              key={m.label}
+              href={m.href}
+              className={
+                "rounded-md px-4 py-3 text-[15px] transition-colors " +
+                (path === m.href
+                  ? "bg-brand text-white"
+                  : "text-white/90 hover:text-brand")
+              }
+            >
+              {m.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* BOTTOM ACTIONS */}
+        <div className="mt-auto flex flex-col gap-2">
+          {email && (
+            <p
+              className="truncate px-4 text-xs text-white/50"
+              title={email}
+            >
+              {email}
+            </p>
+          )}
+
+          <button className="flex items-center gap-2 rounded-md bg-brand px-4 py-3 text-[15px] text-white">
+            <Cog width={18} height={18} />
+            Setting
+          </button>
+
+          <LogoutButton className="rounded-md border border-line px-4 py-3 text-left text-[15px] text-white/80 transition-colors hover:border-brand hover:text-brand" />
+        </div>
+      </aside>
+    </>
   );
 }

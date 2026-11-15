@@ -4,7 +4,7 @@ import "./globals.css";
 const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-montserrat" });
 
 export const metadata = {
-  title: "Astra Vital",
+  title: "Medteor",
   description: "Health dashboard with an interactive 3D anatomy body",
 };
 
